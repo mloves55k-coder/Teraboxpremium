@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeraPlayer Pro | Play & Download</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TeraPlayer <span>Pro</span></h1>
+            <p>Paste link and watch instantly</p>
+        </header>
+        
+        <div class="input-group">
+            <div class="input-wrapper">
+                <i class="fas fa-play-circle"></i>
+                <input type="text" id="teraboxUrl" placeholder="Paste TeraBox video link...">
+            </div>
+            <button id="playBtn" onclick="extractVideo()">
+                <i class="fas fa-play"></i> <span>PLAY NOW</span>
+            </button>
+        </div>
+
+        <div id="statusMessage" class="status-msg"></div>
+
+        <div id="result" class="result-card hidden">
+            <div class="video-box">
+                <video id="mainPlayer" controls playsinline crossorigin="anonymous"></video>
+            </div>
+            
+            <div class="action-grid">
+                <a id="downloadBtn" href="#" class="btn-action btn-dl" target="_blank">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                <button onclick="shareWhatsApp()" class="btn-action btn-wa">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button onclick="systemShare()" class="btn-action btn-sh">
+                    <i class="fas fa-share-alt"></i> Share All
+                </button>
+            </div>
+        </div>
+
+        <div class="footer-info">
+            <p>Status: <span id="serverStatus" style="color: #00ff88;">Server Online</span></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
