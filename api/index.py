@@ -6,8 +6,6 @@ import re
 app = Flask(__name__)
 CORS(app)
 
-# ❌ YAHAN PELE @app.route('/') THA, USE DELETE KAR DEIN
-
 @app.route('/api/extract', methods=['POST'])
 def extract():
     try:
@@ -18,7 +16,6 @@ def extract():
 
         headers = {
             "User-Agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36",
-            "X-Requested-With": "com.dubox.drive",
             "Referer": "https://www.teraboxapp.com/"
         }
 
