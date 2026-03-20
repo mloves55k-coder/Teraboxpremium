@@ -11,25 +11,20 @@ def extract():
     try:
         data = request.json
         url = data.get('url', '')
-        if not url:
-            return jsonify({"status": "error", "message": "No URL provided"}), 400
         
-        # Extract SURL
+        # SURL Extract
         match = re.search(r'/s/([a-zA-Z0-9_-]+)', url)
         surl = match.group(1) if match else url.split('/')[-1]
 
-        # Professional Headers to mimic a real user
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Accept": "application/json, text/plain, */*",
-            "Origin": "https://www.terabox.com",
-            "Referer": f"https://www.terabox.com/sharing/link?surl={surl}",
-            "X-Requested-With": "XMLHttpRequest"
-        }
-
-        # Official App ID used by TeraBox
+        # TeraBox Block Protection: Using Mobile App Logic
         api_url = f"https://www.teraboxapp.com/share/list?surl={surl}&dir=%2F&cnt=1000&order=time&desc=1&web=1&app_id=250528"
         
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36",
+            "X-Requested-With": "com.dubox.drive",
+            "Referer": "https://www.teraboxapp.com/main"
+        }
+
         response = requests.get(api_url, headers=headers, timeout=15)
         res_data = response.json()
 
@@ -38,20 +33,15 @@ def extract():
             return jsonify({
                 "status": "success",
                 "title": file_info.get('server_filename'),
-                "download_link": file_info.get('dlink'),
-                "thumbnail": file_info.get('thumbs', {}).get('url3', '')
+                "download_link": file_info.get('dlink')
             })
         
-        # If blocked or captcha needed
-        return jsonify({
-            "status": "captcha",
-            "verify_url": f"https://www.teraboxapp.com/sharing/link?surl={surl}"
-        }), 403
+        return jsonify({"status": "error", "message": "TeraBox Security Blocked This IP"}), 403
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "Server Busy"}), 500
 
-# Required for Vercel
+# Vercel requirement
 def handler(app, event, context):
     return app(event, context)
-          
+    
