@@ -4,44 +4,37 @@ import re
 
 app = Flask(__name__)
 
-# Aapka pasandeeda design
+# --- UI DESIGN ---
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeraPlayer Pro | Ultra Bypass</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeraPlayer Pro | Parrot Mode</title>
     <style>
         body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .box { max-width: 500px; margin: auto; background: #1e293b; padding: 30px; border-radius: 20px; border: 2px solid #00ff88; box-shadow: 0 0 25px rgba(0,255,136,0.2); }
-        h1 span { color: #00ff88; }
-        input { width: 90%; padding: 14px; margin: 15px 0; border-radius: 10px; border: none; background: #334155; color: white; outline: none; }
-        button { background: #00ff88; color: black; border: none; padding: 14px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; }
-        #status { margin-top: 20px; color: #94a3b8; font-size: 14px; }
-        video { width: 100%; margin-top: 20px; border-radius: 10px; display: none; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        .card { max-width: 450px; margin: auto; background: #1e293b; padding: 25px; border-radius: 15px; border: 2px solid #00ff88; }
+        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 8px; border: none; background: #334155; color: white; }
+        button { background: #00ff88; color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; }
+        video { width: 100%; margin-top: 20px; border-radius: 10px; display: none; }
+        #status { margin-top: 15px; font-size: 13px; color: #94a3b8; }
     </style>
 </head>
 <body>
-    <div class="box">
+    <div class="card">
         <h1>TeraPlayer <span>Pro</span></h1>
-        <p>Bypassing TeraBox Security...</p>
-        <input type="text" id="url" placeholder="Paste link here...">
-        <button onclick="runBypass()">🚀 UNLOCK & PLAY</button>
-        <div id="status">System Online.</div>
+        <p>Using Parrot-Bypass Logic</p>
+        <input type="text" id="url" placeholder="Paste TeraBox Link">
+        <button onclick="start()">🚀 BYPASS & PLAY</button>
+        <div id="status">Ready...</div>
         <video id="p" controls></video>
     </div>
-
     <script>
-        async function runBypass() {
+        async function start() {
             const url = document.getElementById('url').value;
             const status = document.getElementById('status');
-            const p = document.getElementById('p');
             if(!url) return;
-
-            status.innerHTML = "⚡ Initializing Exploit...";
-            status.style.color = "#00ff88";
-
+            status.innerText = "⏳ Connecting to Private API...";
             try {
                 const res = await fetch('/api/extract', {
                     method: 'POST',
@@ -49,17 +42,14 @@ HTML_TEMPLATE = """
                     body: JSON.stringify({url: url})
                 });
                 const data = await res.json();
-                
                 if(data.status === 'success') {
-                    status.innerHTML = "✅ Success: " + data.title;
-                    p.src = data.download_link;
-                    p.style.display = "block";
-                    p.play();
-                } else {
-                    status.innerHTML = "❌ " + data.message;
-                    status.style.color = "#ff4d4d";
-                }
-            } catch(e) { status.innerHTML = "❌ Connection Refused!"; }
+                    status.innerText = "✅ Bypassed Successfully!";
+                    const v = document.getElementById('p');
+                    v.src = data.download_link;
+                    v.style.display = "block";
+                    v.play();
+                } else { status.innerText = "❌ Blocked: " + data.message; }
+            } catch(e) { status.innerText = "❌ Connection Failed!"; }
         }
     </script>
 </body>
@@ -67,38 +57,38 @@ HTML_TEMPLATE = """
 """
 
 @app.route('/')
-def home():
-    return render_template_string(HTML_TEMPLATE)
+def home(): return render_template_string(HTML_TEMPLATE)
 
 @app.route('/api/extract', methods=['POST'])
 def extract():
     try:
         data = request.json
         url = data.get('url', '')
-        match = re.search(r'/s/([a-zA-Z0-9_-]+)', url)
-        surl = match.group(1) if match else url.split('/')[-1]
+        # Extract SURL
+        surl = re.search(r'/s/([a-zA-Z0-9_-]+)', url)
+        surl = surl.group(1) if surl else url.split('/')[-1]
 
-        # --- ADVANCED BYPASS API ---
-        # Ye aik public worker hai jo TeraBox ke cookies aur tokens manage karta hai
-        api_url = f"https://terabox-dl.qtcloud.workers.dev/api/get-info?shorturl={surl}"
+        # --- PARROT BYPASS ENDPOINT ---
+        # Ye aik public proxy hai jo cookies manage karti hai
+        target = f"https://terabox-dl.qtcloud.workers.dev/api/get-info?shorturl={surl}"
         
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36",
             "Referer": "https://www.terabox.com/"
         }
 
-        r = requests.get(api_url, headers=headers, timeout=15)
+        r = requests.get(target, headers=headers, timeout=15)
         res = r.json()
 
         if 'download_link' in res:
             return jsonify({
                 "status": "success",
-                "title": res.get('file_name', 'Bypassed Video'),
+                "title": res.get('file_name', 'Video'),
                 "download_link": res['download_link']
             })
         
-        return jsonify({"status": "error", "message": "TeraBox is rotating keys. Try a different link or wait 2 mins."}), 403
+        return jsonify({"status": "error", "message": "TeraBox Security is high. Try again."}), 403
 
     except Exception as e:
-        return jsonify({"status": "error", "message": "Server Overloaded"}), 500
-    
+        return jsonify({"status": "error", "message": "Proxy Offline"}), 500
+            
