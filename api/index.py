@@ -1,55 +1,43 @@
 from flask import Flask, request, jsonify, render_template_string
-from flask_cors import CORS
 import requests
 import re
 
 app = Flask(__name__)
-CORS(app)
 
-# --- YE HAI AAPKA FRONTEND (HTML + CSS + JS) ---
+# --- FRONTEND (Wahi design jo aapko pasand hai) ---
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeraPlayer Pro | Vercel Edition</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>TeraPlayer Pro | Bypass King</title>
     <style>
-        :root { --primary: #00ff88; --bg: #0f172a; --card: #1e293b; }
-        body { background: var(--bg); color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 span { color: var(--primary); }
-        input { width: 80%; padding: 12px; border-radius: 8px; border: none; margin-bottom: 10px; background: #334155; color: white; }
-        button { background: var(--primary); color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .hidden { display: none; }
-        video { width: 100%; border-radius: 10px; margin-top: 20px; background: #000; }
-        .btn-dl { display: inline-block; margin-top: 15px; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; }
+        body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .box { max-width: 500px; margin: auto; background: #1e293b; padding: 30px; border-radius: 15px; border: 1px solid #00ff88; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #334155; color: white; }
+        button { background: #00ff88; color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        video { width: 100%; margin-top: 20px; border-radius: 10px; display: none; }
+        #status { margin-top: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="box">
         <h1>TeraPlayer <span>Pro</span></h1>
-        <p>Vercel Powered Bypass</p>
-        <input type="text" id="url" placeholder="Paste TeraBox link here...">
-        <br>
-        <button onclick="getLink()">PLAY NOW</button>
-        <div id="msg" style="margin-top:10px;"></div>
-        
-        <div id="result" class="hidden">
-            <video id="player" controls></video>
-            <br>
-            <a id="dl" href="#" class="btn-dl" target="_blank">Download Video</a>
-        </div>
+        <input type="text" id="url" placeholder="Paste TeraBox Link Here">
+        <button onclick="bypass()">PLAY NOW</button>
+        <div id="status"></div>
+        <video id="player" controls></video>
     </div>
 
     <script>
-        async function getLink() {
+        async function bypass() {
             const url = document.getElementById('url').value;
-            const msg = document.getElementById('msg');
-            if(!url) return alert("Link toh dalo bhai!");
+            const status = document.getElementById('status');
+            const player = document.getElementById('player');
+            if(!url) return alert("Link kahan hai?");
             
-            msg.innerHTML = "🚀 Extracting... Please wait";
+            status.innerHTML = "⏳ Bypassing Security...";
             try {
                 const res = await fetch('/api/extract', {
                     method: 'POST',
@@ -58,24 +46,22 @@ HTML_TEMPLATE = """
                 });
                 const data = await res.json();
                 if(data.status === 'success') {
-                    msg.innerHTML = "✅ Found: " + data.title;
-                    document.getElementById('result').classList.remove('hidden');
-                    document.getElementById('player').src = data.download_link;
-                    document.getElementById('dl').href = data.download_link;
+                    status.innerHTML = "✅ Playing: " + data.title;
+                    player.src = data.download_link;
+                    player.style.display = "block";
+                    player.play();
                 } else {
-                    msg.innerHTML = "❌ Error: " + data.message;
+                    status.innerHTML = "❌ Blocked: " + data.message;
                 }
-            } catch(e) { msg.innerHTML = "❌ Server Error!"; }
+            } catch(e) { status.innerHTML = "❌ Server Error!"; }
         }
     </script>
 </body>
 </html>
 """
 
-# --- YE HAI AAPKA BACKEND (LOGIC) ---
-
 @app.route('/')
-def index():
+def home():
     return render_template_string(HTML_TEMPLATE)
 
 @app.route('/api/extract', methods=['POST'])
@@ -83,29 +69,37 @@ def extract():
     try:
         data = request.json
         url = data.get('url', '')
+        
+        # SURL Extraction
         match = re.search(r'/s/([a-zA-Z0-9_-]+)', url)
         surl = match.group(1) if match else url.split('/')[-1]
 
+        # --- YE HAI REAL BYPASS LOGIC ---
+        # Hum direct dlink fetch karenge bina kisi middleman ke
+        api_url = f"https://www.teraboxapp.com/share/list?app_id=250528&surl={surl}&shorturl={surl}"
+        
         headers = {
-            "User-Agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36",
-            "X-Requested-With": "com.dubox.drive",
-            "Referer": "https://www.teraboxapp.com/"
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G960F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
+            "Accept": "application/json",
+            "X-Requested-With": "com.dubox.drive"
         }
 
-        api_url = f"https://www.teraboxapp.com/share/list?surl={surl}&dir=%2F&cnt=1000&web=1&app_id=250528"
-        response = requests.get(api_url, headers=headers, timeout=15)
-        res_data = response.json()
+        r = requests.get(api_url, headers=headers, timeout=15)
+        res = r.json()
 
-        if res_data.get('errno') == 0:
+        if 'list' in res and len(res['list']) > 0:
+            file_data = res['list'][0]
+            # Direct link extraction
+            dlink = file_data.get('dlink')
+            
             return jsonify({
                 "status": "success",
-                "title": res_data['list'][0].get('server_filename'),
-                "download_link": res_data['list'][0].get('dlink')
+                "title": file_data.get('server_filename'),
+                "download_link": dlink
             })
-        return jsonify({"status": "error", "message": "TeraBox Security Block"}), 403
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        
+        return jsonify({"status": "error", "message": "TeraBox ne block kiya hai. Naya Link try karein."}), 403
 
-# Vercel ko app object chahiye hota hai
-app = app
-                
+    except Exception as e:
+        return jsonify({"status": "error", "message": "Server Busy"}), 500
+        
