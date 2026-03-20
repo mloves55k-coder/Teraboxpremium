@@ -1,45 +1,47 @@
 from flask import Flask, request, jsonify, render_template_string
 import requests
 import re
-import time
 
 app = Flask(__name__)
 
-# --- UI (Aapka Preferred Design) ---
+# Aapka pasandeeda design
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeraPlayer Pro | Fixed</title>
+    <title>TeraPlayer Pro | Ultra Bypass</title>
     <style>
         body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: #1e293b; padding: 25px; border-radius: 15px; border: 2px solid #00ff88; }
-        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 8px; border: none; background: #334155; color: white; }
-        button { background: #00ff88; color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        #status { margin-top: 20px; font-size: 14px; color: #94a3b8; }
-        video { width: 100%; margin-top: 20px; border-radius: 10px; display: none; }
-        .dl-btn { display: none; margin-top: 10px; color: #00ff88; text-decoration: none; font-weight: bold; }
+        .box { max-width: 500px; margin: auto; background: #1e293b; padding: 30px; border-radius: 20px; border: 2px solid #00ff88; box-shadow: 0 0 25px rgba(0,255,136,0.2); }
+        h1 span { color: #00ff88; }
+        input { width: 90%; padding: 14px; margin: 15px 0; border-radius: 10px; border: none; background: #334155; color: white; outline: none; }
+        button { background: #00ff88; color: black; border: none; padding: 14px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; }
+        #status { margin-top: 20px; color: #94a3b8; font-size: 14px; }
+        video { width: 100%; margin-top: 20px; border-radius: 10px; display: none; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="box">
         <h1>TeraPlayer <span>Pro</span></h1>
-        <input type="text" id="url" placeholder="Paste TeraBox Link Here">
-        <button onclick="startBypass()">🚀 PLAY NOW</button>
-        <div id="status">Ready to bypass...</div>
-        <video id="v-player" controls playsinline></video>
-        <br><a id="d-link" class="dl-btn" target="_blank">Download File</a>
+        <p>Bypassing TeraBox Security...</p>
+        <input type="text" id="url" placeholder="Paste link here...">
+        <button onclick="runBypass()">🚀 UNLOCK & PLAY</button>
+        <div id="status">System Online.</div>
+        <video id="p" controls></video>
     </div>
 
     <script>
-        async function startBypass() {
+        async function runBypass() {
             const url = document.getElementById('url').value;
             const status = document.getElementById('status');
-            if(!url) return alert("Link kahan hai?");
-            
-            status.innerText = "⚡ Cracking TeraBox Security...";
+            const p = document.getElementById('p');
+            if(!url) return;
+
+            status.innerHTML = "⚡ Initializing Exploit...";
+            status.style.color = "#00ff88";
+
             try {
                 const res = await fetch('/api/extract', {
                     method: 'POST',
@@ -47,19 +49,17 @@ HTML_TEMPLATE = """
                     body: JSON.stringify({url: url})
                 });
                 const data = await res.json();
+                
                 if(data.status === 'success') {
-                    status.innerText = "✅ Found: " + data.title;
-                    const v = document.getElementById('v-player');
-                    const d = document.getElementById('d-link');
-                    v.src = data.download_link;
-                    v.style.display = "block";
-                    d.href = data.download_link;
-                    d.style.display = "inline-block";
-                    v.play();
+                    status.innerHTML = "✅ Success: " + data.title;
+                    p.src = data.download_link;
+                    p.style.display = "block";
+                    p.play();
                 } else {
-                    status.innerText = "❌ Blocked: " + data.message;
+                    status.innerHTML = "❌ " + data.message;
+                    status.style.color = "#ff4d4d";
                 }
-            } catch(e) { status.innerText = "❌ Connection Failed!"; }
+            } catch(e) { status.innerHTML = "❌ Connection Refused!"; }
         }
     </script>
 </body>
@@ -67,7 +67,7 @@ HTML_TEMPLATE = """
 """
 
 @app.route('/')
-def index():
+def home():
     return render_template_string(HTML_TEMPLATE)
 
 @app.route('/api/extract', methods=['POST'])
@@ -78,37 +78,27 @@ def extract():
         match = re.search(r'/s/([a-zA-Z0-9_-]+)', url)
         surl = match.group(1) if match else url.split('/')[-1]
 
-        # --- REVOLUTIONARY METHOD: Using a more stable public proxy API ---
-        # Ye APIs specifically TeraBox security ke liye bani hain
-        proxies = [
-            f"https://terabox-api-topaz.vercel.app/api?id={surl}",
-            f"https://terabox-dl.qtcloud.workers.dev/api/get-info?shorturl={surl}"
-        ]
+        # --- ADVANCED BYPASS API ---
+        # Ye aik public worker hai jo TeraBox ke cookies aur tokens manage karta hai
+        api_url = f"https://terabox-dl.qtcloud.workers.dev/api/get-info?shorturl={surl}"
+        
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://www.terabox.com/"
+        }
 
-        for p_api in proxies:
-            try:
-                r = requests.get(p_api, timeout=12)
-                res = r.json()
-                
-                # Handling Structure 1
-                if 'download_link' in res:
-                    return jsonify({
-                        "status": "success",
-                        "title": res.get('file_name', 'TeraBox Video'),
-                        "download_link": res['download_link']
-                    })
-                # Handling Structure 2
-                elif 'list' in res and len(res['list']) > 0:
-                    return jsonify({
-                        "status": "success",
-                        "title": res['list'][0].get('server_filename'),
-                        "download_link": res['list'][0].get('dlink')
-                    })
-            except:
-                continue
+        r = requests.get(api_url, headers=headers, timeout=15)
+        res = r.json()
 
-        return jsonify({"status": "error", "message": "TeraBox is too strong right now. Please try again in 5 minutes."}), 403
+        if 'download_link' in res:
+            return jsonify({
+                "status": "success",
+                "title": res.get('file_name', 'Bypassed Video'),
+                "download_link": res['download_link']
+            })
+        
+        return jsonify({"status": "error", "message": "TeraBox is rotating keys. Try a different link or wait 2 mins."}), 403
 
     except Exception as e:
-        return jsonify({"status": "error", "message": "Backend Glitch"}), 500
-        
+        return jsonify({"status": "error", "message": "Server Overloaded"}), 500
+    
