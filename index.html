@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>TeraPlayer Pro | Play & Download</title>
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -29,7 +31,15 @@
 
         <div id="result" class="result-card hidden">
             <div class="video-box">
-                <video id="mainPlayer" controls playsinline crossorigin="anonymous" referrerpolicy="no-referrer"></video>
+                <video id="mainPlayer" 
+                       class="video-js vjs-theme-city vjs-big-play-centered" 
+                       controls 
+                       preload="auto" 
+                       playsinline 
+                       crossorigin="anonymous" 
+                       referrerpolicy="no-referrer">
+                    <p class="vjs-no-js">To view this video please enable JavaScript.</p>
+                </video>
             </div>
             
             <div class="action-grid">
@@ -50,6 +60,7 @@
         </div>
     </div>
 
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
